@@ -324,7 +324,7 @@ module Choco =
             if found <> None then found.Value else failwith "Cannot find the choco executable."
 
         traceStartTask "choco" args
-        let setInfo (info:ProcessStartInfo) =
+        let setInfo (info:StartInfo) =
             info.FileName <- chocoExe
             info.Arguments <- args
         let result = ExecProcess (setInfo) timeout

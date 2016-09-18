@@ -105,7 +105,7 @@ let TypeScriptCompiler setParams files =
         files
         |> Seq.map (buildArguments parameters)
         |> Seq.map (fun arguments -> 
-               ExecProcessAndReturnMessages (fun (info : Diagnostics.ProcessStartInfo) -> 
+               ExecProcessAndReturnMessages (fun (info : StartInfo) -> 
                    info.FileName <- parameters.ToolPath
                    info.Arguments <- arguments) parameters.TimeOut)
         |> Seq.toList

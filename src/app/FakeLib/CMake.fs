@@ -162,7 +162,7 @@ module CMake =
         let arguments = if (String.IsNullOrEmpty args) then "\"" + binaryDir + "\"" else args
         let fullCommand = cmakeExe + " " + arguments
         traceStartTask "CMake" fullCommand
-        let setInfo (info:ProcessStartInfo) =
+        let setInfo (info:StartInfo) =
             info.FileName <- cmakeExe
             info.WorkingDirectory <- binaryDir
             info.Arguments <- arguments

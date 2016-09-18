@@ -46,6 +46,21 @@ type ProcessResult =
           Messages = messages
           Errors = errors }
 
+type StartInfo() =
+  member val UseShellExecute = false with get, set
+  member val Verb = "" with get, set
+  member val Arguments = "" with get, set
+  member val FileName = "" with get, set
+  member val WorkingDirectory = "" with get, set
+  member val EnvironmentVariables = new System.Collections.Specialized.StringDictionary() with get, set
+  
+  
+/// Modifies the ProcessStartInfo according to the platform semantics
+let platformInfoAction (psi:StartInfo) = 
+    if isMono && psi.FileName.EndsWith ".exe" then 
+        psi.Arguments <- monoArguments + " \"" + psi.FileName + "\" " + psi.Arguments
+        psi.FileName <- monoPath
+
 /// Runs the given process and returns the exit code.
 /// ## Parameters
 ///
@@ -56,9 +71,10 @@ type ProcessResult =
 ///  - `messageF` - A function which will be called with the message log.
 let ExecProcessWithLambdas configProcessStartInfoF (timeOut : TimeSpan) silent errorF messageF = 
     use proc = new Process()
-    proc.StartInfo.UseShellExecute <- false
-    configProcessStartInfoF proc.StartInfo
-    platformInfoAction proc.StartInfo
+    let startInfo = new StartInfo()
+    startInfo.UseShellExecute <- false
+    configProcessStartInfoF startInfo
+    platformInfoAction startInfo
     if isNullOrEmpty proc.StartInfo.WorkingDirectory |> not then 
         if Directory.Exists proc.StartInfo.WorkingDirectory |> not then 
             failwithf "Start of process %s failed. WorkingDir %s does not exist." proc.StartInfo.FileName 
@@ -196,7 +212,7 @@ let pathDirectories =
 /// Sets the environment Settings for the given startInfo.
 /// Existing values will be overriden.
 /// [omit]
-let setEnvironmentVariables (startInfo : ProcessStartInfo) environmentSettings = 
+let setEnvironmentVariables (startInfo : StartInfo) environmentSettings = 
     for key, value in environmentSettings do
         if startInfo.EnvironmentVariables.ContainsKey key then startInfo.EnvironmentVariables.[key] <- value
         else startInfo.EnvironmentVariables.Add(key, value)

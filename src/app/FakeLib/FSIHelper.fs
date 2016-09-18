@@ -156,7 +156,7 @@ type FsiArgs =
         | None -> Choice2Of2("Unable to locate the build script path.") 
     
 let private FsiStartInfo workingDirectory (FsiArgs(fsiOptions, scriptPath, scriptArgs)) environmentVars =
-    (fun (info: ProcessStartInfo) ->
+    (fun (info: StartInfo) ->
         info.FileName <- fsiPath
         info.Arguments <- String.concat " " (fsiOptions @ [scriptPath] @ scriptArgs)
         info.WorkingDirectory <- workingDirectory
