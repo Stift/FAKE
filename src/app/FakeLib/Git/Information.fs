@@ -35,17 +35,15 @@ let isGitVersionHigherOrEqual referenceVersion =
 /// Gets the git branch name
 let getBranchName repositoryDir =
     try
-        let ok,msg,errors = runGitCommand repositoryDir "status"
-        let s = msg |> Seq.head
+        let ok,msg,errors = runGitCommand repositoryDir "branch"
+        let s = msg |> Seq.filter (startsWith "*") |> Seq.map (fun l -> l.Substring(2)) |> Seq.head
 
-        let mutable replaceBranchString = "On branch "
-        let mutable replaceNoBranchString = "Not currently on any branch."
+        let mutable replaceNoBranchString = "(no branch)"
         let noBranch = "NoBranch"
 
-        if isGitVersionHigherOrEqual "1.9" then replaceNoBranchString <- "HEAD detached"
-        if not <| isGitVersionHigherOrEqual "1.9" then replaceBranchString <- "# " + replaceBranchString
+        if isGitVersionHigherOrEqual "1.9" then replaceNoBranchString <- "(HEAD"
 
-        if startsWith replaceNoBranchString s then noBranch else s.Replace(replaceBranchString,"")
+        if startsWith replaceNoBranchString s then noBranch else s
     with _ when (repositoryDir = "" || repositoryDir = ".") && buildServer = TeamFoundation ->
         match environVarOrNone "BUILD_SOURCEBRANCHNAME" with
         | None -> reraise()
